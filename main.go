@@ -1,21 +1,28 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
+	"sync/atomic"
 )
 
 func main() {
 	const filepathRoot = "."
 	const port = "8080"
 
+	apiCfg := apiConfig{
+		fileserverHits: atomic.Int32{},
+	}
 	mux := http.NewServeMux()
 	// Adding /app/ makes it so you access files at url/app/
-	mux.Handle("/app/", http.StripPrefix("/app/", http.FileServer(http.Dir(filepathRoot))))
+	mux.Handle("/app/", apiCfg.middlewareMetricsInc(http.StripPrefix("/app/", http.FileServer(http.Dir(filepathRoot)))))
 	// Note that FileServer automatically serves index.html with just "/"
 
 	// For system health check can go to url/healthz now
-	mux.HandleFunc("/healthz", handlerReadiness)
+	mux.HandleFunc("GET /healthz", handlerReadiness)
+	mux.HandleFunc("GET /metrics", apiCfg.handlerMetrics)
+	mux.HandleFunc("POST /reset", apiCfg.handlerReset)
 
 	server := &http.Server{
 		Handler: mux,
@@ -27,8 +34,21 @@ func main() {
 	log.Fatal(server.ListenAndServe())
 }
 
-func handlerReadiness(w http.ResponseWriter, r *http.Request) {
+// Holding any stateful, in-memory data we need to keep track of
+type apiConfig struct {
+	fileserverHits atomic.Int32
+}
+
+func (cfg *apiConfig) middlewareMetricsInc(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		cfg.fileserverHits.Add(1)
+		// How to call next handler
+		next.ServeHTTP(w, r)
+	})
+}
+
+func (cfg *apiConfig) handlerMetrics(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 	w.WriteHeader(http.StatusOK)
-	w.Write([]byte(http.StatusText(http.StatusOK)))
+	w.Write([]byte(fmt.Sprintf("Hits: %d", cfg.fileserverHits.Load())))
 }
