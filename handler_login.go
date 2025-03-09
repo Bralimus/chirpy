@@ -65,10 +65,11 @@ func (cfg *apiConfig) handlerLogin(w http.ResponseWriter, r *http.Request) {
 
 	userResponse := response{
 		User: User{
-			ID:        dbuser.ID,
-			CreatedAt: dbuser.CreatedAt,
-			UpdatedAt: dbuser.UpdatedAt,
-			Email:     dbuser.Email},
+			ID:          dbuser.ID,
+			CreatedAt:   dbuser.CreatedAt,
+			UpdatedAt:   dbuser.UpdatedAt,
+			Email:       dbuser.Email,
+			IsChirpyRed: dbuser.IsChirpyRed},
 		Token:        userToken,
 		RefreshToken: refreshToken.Token,
 	}
