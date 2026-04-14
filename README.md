@@ -1,20 +1,32 @@
-# chirpy
+# Chirpy
+Chirpy is a lightweight Twitter-like REST API built in Go.
 
-## Chirpy DB
-postgres PASSWORD: postgres
-Connection string: postgres://postgres:postgres@localhost:5432/chirpy
+## Features
+  - User registration and authentication
+  - Create, read, and delete chirps
+  - PostgreSQL database integration
+  - JSON-based request and response handling
 
-sudo service postgresql status - check server status
-goose postgres postgres://postgres:postgres@localhost:5432/chirpy up
-
-
-**COME BACK AND DO THIS**
-
-
-How to Present This Project
-When someone navigates to your project's link, the first thing they'll see is the README.md file. You should quickly and concisely explain:
-
-What your project does
-Why someone should care
-How to install and run your project
-Take a look at one of my portfolio projects as an example: [go-rabbitmq.](https://github.com/wagslane/go-rabbitmq)
+## Commands
+  - GET /api/healthz
+    - Health check
+  - GET /admin/metrics
+    - View server metrics
+  - POST /admin/reset
+    - Reset state
+  - POST /api/users
+    - Create user
+  - PUT /api/users
+    - Update user
+  - POST /api/login
+    - Login user
+  - POST /api/refresh
+    - Refresh token
+  - POST /api/revoke
+    - Revoke token
+  - POST /api/chirps
+    - Create chirp
+  - GET /api/chirps/{chirpID}
+    - Get single chirp
+  - DELETE /api/chirps/{chirpID}
+    - Delete chirp
